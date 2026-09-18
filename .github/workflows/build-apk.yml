@@ -1,0 +1,42 @@
+name: Package HardwareStoreLedger APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Find APK
+        shell: bash
+        run: |
+          set -e
+
+          mkdir -p release
+
+          APK=$(find . -type f -name "*.apk" \
+            -not -path "./release/*" | head -n 1)
+
+          if [ -z "$APK" ]; then
+            echo "ERROR: APK file not found."
+            echo "Please upload HardwareStoreLedger.apk to the repository."
+            exit 1
+          fi
+
+          echo "APK found: $APK"
+
+          cp "$APK" release/HardwareStoreLedger.apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: HardwareStoreLedger-APK
+          path: release/HardwareStoreLedger.apk
+          if-no-files-found: error
